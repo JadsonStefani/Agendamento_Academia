@@ -1,6 +1,10 @@
-﻿namespace Agendamento.Services
+﻿using Agendamento.Models;
+
+namespace Agendamento.Services
 {
-    public class IServAluno
+    public interface IServAluno
     {
+        Task<Aluno> CadastrarAlunoAsync(AlunoDTO alunoDTO);
+        Task<RelatorioAlunoDTO> GerarRelatorioAlunoAsync(int alunoId);
     }
 }

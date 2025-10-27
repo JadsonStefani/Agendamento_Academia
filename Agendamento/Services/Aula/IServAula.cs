@@ -1,6 +1,9 @@
-﻿namespace Agendamento.Services
+﻿using Agendamento.Models;
+
+namespace Agendamento.Services
 {
-    public class IServAula
+    public interface IServAula
     {
+        Task<Aula> CriarAulaAsync(AulaDTO aulaDTO);
     }
 }

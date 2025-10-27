@@ -1,4 +1,5 @@
-﻿using Agendamento.Services.Agendamento;
+﻿using Agendamento.Services;
+using Agendamento.Services.Agendamento.DTO;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Agendamento.Controllers
@@ -7,66 +8,70 @@ namespace Agendamento.Controllers
     [Route("api/[controller]")]
     public class AgendamentoController : Controller
     {
-        private readonly IServAluno _servAgendamento;
+        private readonly IServAgendamento _servAgendamento;
 
-        public AgendamentoController(IServAluno servAgendamento)
+        public AgendamentoController(IServAgendamento servAgendamento)
         {
             _servAgendamento = servAgendamento;
         }
 
         [HttpGet]
         [Route("")]
-        public IActionResult Listar()
+        public async Task<ActionResult<List<ListaAgendamentoDTO>>> Listar()
         {
             try
             {
-                return Ok();
+                var agendamentos = await _servAgendamento.GetAgendamentosAsync();
+                var agendamentosDTO = agendamentos.Select(a => new ListaAgendamentoDTO
+                {
+                    Id = a.Id,
+                    AlunoId = a.AlunoId,
+                    AlunoNome = a.Aluno.Nome,
+                    AulaId = a.AulaId,
+                    AulaTipo = a.Aula.TipoAula,
+                    AulaDataHora = a.Aula.DataHora,
+                    DataAgendamento = a.DataAgendamento
+                }).ToList();
+                return Ok(agendamentosDTO);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                return BadRequest(e.Message);
+                return BadRequest("Erro ao buscar agendamentos. " + ex.Message);
             }
         }
 
         [HttpPost]
         [Route("")]
-        public IActionResult Inserir([FromBody] int codigo)
+        public async Task<ActionResult> Inserir(AgendamentoDTO agendamentoDTO)
         {
             try
             {
-                return Ok();
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
-        }
+                var agendamento = await _servAgendamento.AgendarAulaAsync(agendamentoDTO);
 
-        [HttpPut]
-        [Route("{codigo}")]
-        public IActionResult Atualizar([FromRoute] int codigo, [FromBody] int reg)
-        {
-            try
+                return Ok("Aula agendada com sucesso.");
+            }  
+            catch (Exception ex)
             {
-                return Ok();
+                return BadRequest("Erro ao agendar aula. " + ex.Message);
             }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
-        }
+        } 
 
         [HttpDelete]
-        [Route("{codigo}")]
-        public IActionResult Remover([FromRoute] int codigo)
+        [Route("{codigoAgendamento}")]
+        public async Task<ActionResult> CancelarAgendamento(int codigoAgendamento)
         {
             try
-            { 
-                return Ok();
-            }
-            catch (Exception e)
             {
-                return BadRequest(e.Message);
+                var sucess = await _servAgendamento.CancelarAgendamentoAsync(codigoAgendamento);
+
+                if (!sucess)
+                    return NotFound(new { error = $"Agendamento com ID {codigoAgendamento} não encontrado" });
+
+                return Ok("Agendamento cancelado com sucesso.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Erro ao cancelar agendamento. " + ex.Message);
             }
         }
     }

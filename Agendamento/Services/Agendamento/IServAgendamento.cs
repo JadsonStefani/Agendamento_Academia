@@ -1,6 +1,12 @@
-﻿namespace Agendamento.Services
+﻿using Agendamento.Models;
+using Agendamento.Services.Agendamento.DTO;
+
+namespace Agendamento.Services
 {
-    public class IServAgendamento
+    public interface IServAgendamento
     {
+        Task<Agendamentos> AgendarAulaAsync(AgendamentoDTO agendamentoDTO);
+        Task<bool> CancelarAgendamentoAsync(int agendamentoId);
+        Task<List<Agendamentos>> GetAgendamentosAsync();
     }
 }
